@@ -1,0 +1,62 @@
+#
+# additional settings for specific cases on SNWAdaptiveRouter
+# Abhishek - needs to be run as a config file after default_settings.txt
+
+
+
+Scenario.simulateConnections = false
+
+# 43200s == 12h - 1 week => 14 * 43200
+Scenario.endTime = 604800
+
+#  group settings
+Scenario.nrofHostGroups = 3
+
+Group.groupID = N
+Group.movementModel = StationaryMovement
+Group.nodeLocation = 0,0
+Group.router = vectors.SNWAdaptiveRouter
+Group.bufferSize = 50M
+Group.nrofHosts = 40
+
+
+# All nodes have the bluetooth interface
+Group.nrofInterfaces = 1
+Group.interface1 = btInterface
+
+# only source has larger buffers
+Group1.bufferSize = 500M
+Group1.groupID = S
+Group1.nrofHosts = 1
+
+Group2.groupID = D
+Group2.nrofHosts = 1
+
+# Message TTL 24 hours (86400) 48 hours as 172800
+Group.msgTtl = 172800
+
+
+# one set of events for generating  contacts between nodes
+Events.nrof = 1
+
+Events1.class = ExternalEventsQueue
+Events1.nrofPreload = 1000.0
+Events1.filePath = [data/all_seven_days.txt;]
+
+
+# now the vectors specific settings
+# src dst nrofCopies   binaryMode  adaptMode   
+# burstGap   burstSize layersSizeMin   layersSizeMax
+SNWRtr.src = S0
+SNWRtr.dst = D1
+SNWRtr.nrofCopies = 32
+SNWRtr.binaryMode = 1
+SNWRtr.adaptMode = 1
+SNWRtr.burstGap = 300
+# present file size as compressed using SHM; should use h265 without layers for true comparision 
+SNWRtr.burstSize = 150k,300k
+SNWRtr.layersSizeMin = 10,1,2,4,8,53,2,2,4,8
+SNWRtr.layersSizeMax = 30,3,6,12,24, 150,6,7,13,25
+
+Scenario.name = snwadapt_C%%SNWRtr.nrofCopies%%_B%%SNWRtr.binaryMode%%_A%%SNWRtr.adaptMode%%
+
