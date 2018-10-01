@@ -11,7 +11,10 @@ import core.Connection;
 import core.DTNHost;
 import core.DTNSim;
 import core.Message;
+import core.MessageListener;
 import core.Settings;
+import core.SimClock;
+import routing.MessageRouter;
 
 /**
  * Implementation of Spray and wait router as depicted in
@@ -56,8 +59,11 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 	protected static int burstSizeMin, burstSizeMax;
 	protected static int numLayers;
 	protected static int layerSizesMin[], layerSizesMax[];
-	protected static String srcNode, dstNode;
+	protected static String srcNodeName, dstNodeName;
 	protected static int adaptMode; // 0 => no Adapt; 1 => Src Adapt; 2 => intermediate Adapt
+	
+	protected boolean isSrc = false;
+	protected boolean isDst = false;
 
 	
 	public SNWAdaptiveRouter(Settings s) {
@@ -75,8 +81,8 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 			burstSizeMin = chunkSizes[0];
 			burstSizeMax = chunkSizes[1];
 			burstGap = snwSettings.getInt(BURST_DURATION);
-			srcNode = snwSettings.getSetting(SRC_NODE);
-			dstNode = snwSettings.getSetting(DST_NODE);
+			srcNodeName = snwSettings.getSetting(SRC_NODE);
+			dstNodeName = snwSettings.getSetting(DST_NODE);
 			layerSizesMin = snwSettings.getCsvInts(SVC_LAYER_SIZES_MIN);
 			layerSizesMax = snwSettings.getCsvInts(SVC_LAYER_SIZES_MAX);
 			assert(layerSizesMin.length == layerSizesMax.length);
@@ -84,7 +90,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 			System.out.println("BG=" + burstGap + " adaptMode=" + adaptMode +
 					" layerSizes-Len=" + layerSizesMin.length +
 					"  burstmin=" + burstSizeMin + " burstax=" + burstSizeMax +
-					" src=" + srcNode + " dst=" + dstNode + 
+					" src=" + srcNodeName + " dst=" + dstNodeName + 
 					" layersMin=" + snwSettings.getSetting(SVC_LAYER_SIZES_MIN) +
 					" layersMax=" + snwSettings.getSetting(SVC_LAYER_SIZES_MAX));
 		}
@@ -101,6 +107,19 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		this.isBinary = r.isBinary;
 	}
 
+	@Override
+	public void init(DTNHost host, List<MessageListener> mListeners) {
+		super.init(host, mListeners);
+		if(host.toString().equals(srcNodeName)) {
+			System.out.println("Set source " + srcNodeName);
+			isSrc = true;
+		}
+		if(host.toString().equals(dstNodeName)) {
+			System.out.println("Set destination " + dstNodeName);
+			isDst = true;
+		}
+		
+	}
 	@Override
 	public int receiveMessage(Message m, DTNHost from) {
 		return super.receiveMessage(m, from);
@@ -123,6 +142,12 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		}
 
 		msg.updateProperty(MSG_COUNT_PROPERTY, nrofCopies);
+		if (msg.getTo() == getHost()) {
+			if(isDst) 
+				processAtDest(msg);
+			else 
+				System.out.println("Message received by destination that is not identfied as isDst " + msg);
+		}
 		return msg;
 	}
 
@@ -136,9 +161,16 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		return true;
 	}
 
+	int lastBurstTime=-3600 * 12;
 	@Override
 	public void update() {
 		super.update();
+		if(isSrc) {
+			if(SimClock.getIntTime() > lastBurstTime + burstGap) {
+				sendBurst();
+				lastBurstTime = SimClock.getIntTime();
+			}
+		}
 		
 		if (!canStartTransfer() || isTransferring()) {
 			return; // nothing to transfer or is currently transferring
@@ -210,15 +242,36 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 	}
 
 	@Override
+	public void changedConnection(Connection con) {
+		super.changedConnection(con);
+		if (con.isUp() ) {
+			importAcks(con.getOtherNode(getHost()).getRouter());
+		}
+	}
+	
+
+	@Override
 	public SNWAdaptiveRouter replicate() {
 		return new SNWAdaptiveRouter(this);
 	}
 	
 	/**
-	 * Reset the settings for next smulation run
+	 * Reset the settings for next simulation run
 	 */
 	public static void reset() {
 		burstGap = Integer.MAX_VALUE;
+	}
+
+	protected void sendBurst() {
+		// TODO
+	}
+	
+	protected void importAcks(MessageRouter other) {
+		// TODO
+	}
+	
+	protected void processAtDest(Message m) {
+		// TODO
 	}
 
 }
