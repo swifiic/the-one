@@ -49,14 +49,16 @@ Events1.filePath = [data/all_seven_days.txt;]
 # burstGap   burstSize layersSizeMin   layersSizeMax
 SNWRtr.src = S0
 SNWRtr.dst = D1
-SNWRtr.nrofCopies = 32
 SNWRtr.binaryMode = 1
 SNWRtr.adaptMode = 1
 SNWRtr.burstGap = 300
 # present file size as compressed using SHM; should use h265 without layers for true comparision 
 SNWRtr.burstSize = 150k,300k
-SNWRtr.layersSizeMin = 10,1,2,4,8,53,2,2,4,8
+SNWRtr.nrofCopies = 32,32,32,32,32, 32,32,32,32,32
+SNWRtr.layersSizeMin = 10,1,2,4,8,  53,2,2,4,8
 SNWRtr.layersSizeMax = 30,3,6,12,24, 150,6,7,13,25
 
-Scenario.name = snwadapt_C%%SNWRtr.nrofCopies%%_B%%SNWRtr.binaryMode%%_A%%SNWRtr.adaptMode%%
+SNWRtr.rngSeed = [ 1001; 1002; 1003; 1004; 1005; 1006;]
+
+Scenario.name = snwadapt_C%%SNWRtr.nrofCopies%%_B%%SNWRtr.binaryMode%%_A%%SNWRtr.adaptMode%%_%%SNWRtr.rngSeed%%
 

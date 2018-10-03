@@ -5,7 +5,10 @@
 package routing.vectors;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random; 
 
 import core.Connection;
 import core.DTNHost;
@@ -36,6 +39,8 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		"copies";
 	
 	public static final String ADAPTATION_MODE = "adaptMode";
+	
+	public static final String RNG_SEED = "rngSeed";
 
 
 	/** Message generation properties */
@@ -52,28 +57,31 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 	}
 	
 
-	protected int initialNrofCopies;
 	protected boolean isBinary;
 	
 	protected static int burstGap = Integer.MAX_VALUE;
 	protected static int burstSizeMin, burstSizeMax;
 	protected static int numLayers;
 	protected static int layerSizesMin[], layerSizesMax[];
+	protected static int nrOfCopies[];
 	protected static String srcNodeName, dstNodeName;
 	protected static int adaptMode; // 0 => no Adapt; 1 => Src Adapt; 2 => intermediate Adapt
 	
 	protected boolean isSrc = false;
 	protected boolean isDst = false;
+	static DTNHost srcHost=null, dstHost=null;
+	static Random rng=null;
 
 	
 	public SNWAdaptiveRouter(Settings s) {
 		super(s);
 		Settings snwSettings = new Settings(SNWAR_NS);
 
-		initialNrofCopies = snwSettings.getInt(NROF_COPIES);
 		isBinary = snwSettings.getBoolean( BINARY_MODE);
 
 		if(burstGap == Integer.MAX_VALUE) {
+			int seed = snwSettings.getInt(RNG_SEED);
+			rng = new Random(seed);
 			adaptMode = snwSettings.getInt(ADAPTATION_MODE, 0);
 			
 			int chunkSizes[] = snwSettings.getCsvInts(CHUNK_SIZE);
@@ -83,6 +91,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 			burstGap = snwSettings.getInt(BURST_DURATION);
 			srcNodeName = snwSettings.getSetting(SRC_NODE);
 			dstNodeName = snwSettings.getSetting(DST_NODE);
+			nrOfCopies = snwSettings.getCsvInts(NROF_COPIES);
 			layerSizesMin = snwSettings.getCsvInts(SVC_LAYER_SIZES_MIN);
 			layerSizesMax = snwSettings.getCsvInts(SVC_LAYER_SIZES_MAX);
 			assert(layerSizesMin.length == layerSizesMax.length);
@@ -103,7 +112,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 	 */
 	protected SNWAdaptiveRouter(SNWAdaptiveRouter r) {
 		super(r);
-		this.initialNrofCopies = r.initialNrofCopies;
+		this.nrOfCopies = r.nrOfCopies;
 		this.isBinary = r.isBinary;
 	}
 
@@ -113,10 +122,14 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		if(host.toString().equals(srcNodeName)) {
 			System.out.println("Set source " + srcNodeName);
 			isSrc = true;
+			assert null != srcHost:  "SRC Host already set";
+			srcHost = host;
 		}
 		if(host.toString().equals(dstNodeName)) {
 			System.out.println("Set destination " + dstNodeName);
 			isDst = true;
+			assert null != dstHost:  "DST Host already set";
+			dstHost = host;
 		}
 		
 	}
@@ -156,7 +169,6 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		makeRoomForNewMessage(msg.getSize());
 
 		msg.setTtl(this.msgTtl);
-		msg.addProperty(MSG_COUNT_PROPERTY, new Integer(initialNrofCopies));
 		addToMessages(msg, true);
 		return true;
 	}
@@ -260,18 +272,81 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 	 */
 	public static void reset() {
 		burstGap = Integer.MAX_VALUE;
+		srcHost=null;
+		dstHost=null;
+		Settings s = new Settings(SNWAR_NS);
+		if (s.contains(RNG_SEED)) {
+			int seed = s.getInt(RNG_SEED);
+			rng = new Random(seed);
+		}
+		else {
+			rng = new Random(0);
+		}
 	}
 
+	// from script copyCounts=( 768,512,256,256,192,192,128,128,96,96 
+	int burstId =0;
+	int sentCount = 0;
 	protected void sendBurst() {
-		// TODO
+		assert null != srcHost : "SRC host not set";
+		assert null != dstHost : "DST host not set";
+		assert rng !=null : "rngSeed not set for SNWAdaptiveRtr";
+		for(int i =0; i < numLayers; i++) {
+			String msgId = "B" + burstId + "_L" + i;
+			int size = layerSizesMin[i] + (int)((layerSizesMax[i] - layerSizesMin[i]) * rng.nextDouble());
+			Message m = new Message(srcHost, dstHost, msgId, size);
+			int copyCount = nrOfCopies[i];// TODO logic for adaptive mode
+			m.addProperty(MSG_COUNT_PROPERTY, new Integer(copyCount)); 
+			
+			this.createNewMessage(m);
+			sentCount++;
+			if(sentCount < 40 || sentCount % 100 ==1) {
+				System.out.println("Sent message with ID " + m.getId() +
+						           " for a total of " + sentCount);
+			}
+		}
+		burstId++;
 	}
 	
+	List<String> ackList = new ArrayList<String>();
+	List<String> srcAckList = new ArrayList<String>();
+	static int removalCount = 0;
 	protected void importAcks(MessageRouter other) {
-		// TODO
+		int incomingSize = ackList.size();
+		try {
+			SNWAdaptiveRouter oth = (SNWAdaptiveRouter)other;
+			List<String> otherList = oth.ackList;
+			for(String msgId : otherList) {
+				if(isSrc) { // for source a private variable to keep all acks
+					if(!srcAckList.contains(msgId))
+						srcAckList.add(msgId);
+				}
+				if(ackList.contains(msgId)) continue;
+				ackList.add(msgId);
+				if(this.getMessage(msgId) != null) {
+					this.removeFromMessages(msgId);
+					if(removalCount++ < 100 || removalCount %1000 == 0)
+						System.out.println("Deleted on ack at node " + 
+					                       getHost() + " total deleted " + removalCount);
+				}
+			}
+			Collections.sort(ackList);
+		}catch (Exception ex) {
+			assert false : "Failed to merge from other router" + ex.getMessage();
+		}
+		
+		if(incomingSize > ackList.size() ) {
+			// can log the additional inputs
+			while(ackList.size() > 4096) {
+				ackList.remove(0);
+			}
+		}
+
 	}
 	
 	protected void processAtDest(Message m) {
-		// TODO
+		ackList.add(m.getId());
+		System.out.println("Delivered at destination " + m.getId());
 	}
 
 }
