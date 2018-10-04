@@ -57,7 +57,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 	}
 	
 
-	protected boolean isBinary;
+	protected static boolean isBinary;
 	
 	protected static int burstGap = Integer.MAX_VALUE;
 	protected static int burstSizeMin, burstSizeMax;
@@ -103,7 +103,6 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 					" layersMin=" + snwSettings.getSetting(SVC_LAYER_SIZES_MIN) +
 					" layersMax=" + snwSettings.getSetting(SVC_LAYER_SIZES_MAX));
 		}
-		
 	}
 
 	/**
@@ -112,8 +111,6 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 	 */
 	protected SNWAdaptiveRouter(SNWAdaptiveRouter r) {
 		super(r);
-		this.nrOfCopies = r.nrOfCopies;
-		this.isBinary = r.isBinary;
 	}
 
 	@Override
@@ -132,10 +129,6 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 			dstHost = host;
 		}
 		
-	}
-	@Override
-	public int receiveMessage(Message m, DTNHost from) {
-		return super.receiveMessage(m, from);
 	}
 
 	@Override
@@ -174,6 +167,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 	}
 
 	int lastBurstTime=-3600 * 12;
+	int summaryPrintTime= 0;
 	@Override
 	public void update() {
 		super.update();
@@ -181,6 +175,10 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 			if(SimClock.getIntTime() > lastBurstTime + burstGap) {
 				sendBurst();
 				lastBurstTime = SimClock.getIntTime();
+			}
+			if(summaryPrintTime + 12 * 3600 < SimClock.getIntTime()) {
+				summaryPrintTime = SimClock.getIntTime();
+				printSummary();
 			}
 		}
 		
@@ -292,7 +290,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		assert null != dstHost : "DST host not set";
 		assert rng !=null : "rngSeed not set for SNWAdaptiveRtr";
 		for(int i =0; i < numLayers; i++) {
-			String msgId = "B" + burstId + "_L" + i;
+			String msgId = "B" + String.format("%04d", burstId) + "_L" + i;
 			int size = layerSizesMin[i] + (int)((layerSizesMax[i] - layerSizesMin[i]) * rng.nextDouble());
 			Message m = new Message(srcHost, dstHost, msgId, size);
 			int copyCount = nrOfCopies[i];// TODO logic for adaptive mode
@@ -300,7 +298,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 			
 			this.createNewMessage(m);
 			sentCount++;
-			if(sentCount < 40 || sentCount % 100 ==1) {
+			if(sentCount < 40 || sentCount %500 ==0) {
 				System.out.println("Sent message with ID " + m.getId() +
 						           " for a total of " + sentCount);
 			}
@@ -324,7 +322,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 				if(ackList.contains(msgId)) continue;
 				ackList.add(msgId);
 				if(this.getMessage(msgId) != null) {
-					this.removeFromMessages(msgId);
+					this.deleteMessage(msgId, false); // not a buffer full drop
 					if(removalCount++ < 100 || removalCount %1000 == 0)
 						System.out.println("Deleted on ack at node " + 
 					                       getHost() + " total deleted " + removalCount);
@@ -344,9 +342,16 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 
 	}
 	
+	int destRcvdCount =0;
 	protected void processAtDest(Message m) {
 		ackList.add(m.getId());
-		System.out.println("Delivered at destination " + m.getId());
+		destRcvdCount++;
+		if(destRcvdCount < 100 || destRcvdCount %500 ==0)
+		System.out.println("Delivered at destination " + m.getId() + " count=" + destRcvdCount);
 	}
 
+	void 	printSummary() {
+		System.out.println("At time " + SimClock.getIntTime() / 3600 + " hours Sent=" + sentCount + 
+				" delivered=" + ((SNWAdaptiveRouter)dstHost.getRouter()).destRcvdCount);
+	}
 }

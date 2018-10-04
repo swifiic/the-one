@@ -17,7 +17,7 @@ Group.movementModel = StationaryMovement
 Group.nodeLocation = 0,0
 Group.router = vectors.SNWAdaptiveRouter
 Group.bufferSize = 50M
-Group.nrofHosts = 40
+Group.nrofHosts = 50
 
 
 # All nodes have the bluetooth interface
@@ -32,6 +32,8 @@ Group1.nrofHosts = 1
 Group2.groupID = D
 Group2.nrofHosts = 1
 
+Group3.nrofHosts = 41
+
 # Message TTL 24 hours (86400) 48 hours as 172800
 Group.msgTtl = 172800
 
@@ -41,7 +43,7 @@ Events.nrof = 1
 
 Events1.class = ExternalEventsQueue
 Events1.nrofPreload = 1000.0
-Events1.filePath = [data/all_seven_days.txt;]
+Events1.filePath = [data/sorted_log_clean.txt;]
 
 
 # now the vectors specific settings
@@ -55,10 +57,19 @@ SNWRtr.burstGap = 300
 # present file size as compressed using SHM; should use h265 without layers for true comparision 
 SNWRtr.burstSize = 150k,300k
 SNWRtr.nrofCopies = 32,32,32,32,32, 32,32,32,32,32
-SNWRtr.layersSizeMin = 10,1,2,4,8,  53,2,2,4,8
-SNWRtr.layersSizeMax = 30,3,6,12,24, 150,6,7,13,25
+SNWRtr.layersSizeMin = 10k,1k,2k,4k,8k,  53k,2k,2k,4k,8k
+SNWRtr.layersSizeMax = 30k,3k,6k,12k,24k, 150k,6k,7k,13k,25k
 
 SNWRtr.rngSeed = [ 1001; 1002; 1003; 1004; 1005; 1006;]
 
 Scenario.name = snwadapt_C%%SNWRtr.nrofCopies%%_B%%SNWRtr.binaryMode%%_A%%SNWRtr.adaptMode%%_%%SNWRtr.rngSeed%%
 
+Report.nrofReports = 3
+# length of the warm up period (simulated seconds)
+Report.warmup = 0
+# default directory of reports (can be overridden per Report with output setting)
+Report.reportDir = reports/
+# Report classes to load
+Report.report1 = MessageStatsReport
+Report.report2 = ContactTimesReport
+Report.report3 = DeliveredMessagesReport
