@@ -4,10 +4,9 @@
 
 SNWRtr.burstSize = 150k,300k
 SNWRtr.nrofCopies = 32
-SNWRtr.layersSizeMin = 150k
-SNWRtr.layersSizeMax = 250k
+SNWRtr.layersSizeMin = 80k
+SNWRtr.layersSizeMax = 180k
 
-SNWRtr.rngSeed = [ 1001; 1002; 1003; 1004; 1005; 1006;]
 
 Scenario.subname = nonSVC
 

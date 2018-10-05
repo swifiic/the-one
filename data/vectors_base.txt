@@ -7,7 +7,7 @@
 Scenario.simulateConnections = false
 
 # 43200s == 12h - 1 week => 14 * 43200
-Scenario.endTime = 604800
+Scenario.endTime = 604805
 
 #  group settings
 Scenario.nrofHostGroups = 3
@@ -52,12 +52,14 @@ Events1.filePath = [data/sorted_log_clean.txt;]
 SNWRtr.src = S0
 SNWRtr.dst = D1
 SNWRtr.binaryMode = 1
-SNWRtr.adaptMode = 1
-SNWRtr.burstGap = 300
+SNWRtr.adaptMode = 0
+SNWRtr.burstGap = 60
 # present file size as compressed using SHM; should use h265 without layers for true comparision 
 SNWRtr.burstSize = 150k,300k
 SNWRtr.nrofCopies = 32,32,32,32,32, 32,32,32,32,32
+# 94KB
 SNWRtr.layersSizeMin = 10k,1k,2k,4k,8k,  53k,2k,2k,4k,8k
+# 246KB
 SNWRtr.layersSizeMax = 30k,3k,6k,12k,24k, 150k,6k,7k,13k,25k
 
 SNWRtr.rngSeed = [ 1001; 1002; 1003; 1004; 1005; 1006;]

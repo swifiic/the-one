@@ -5,7 +5,7 @@
 package routing.vectors;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random; 
@@ -17,7 +17,9 @@ import core.Message;
 import core.MessageListener;
 import core.Settings;
 import core.SimClock;
+import core.SimError;
 import routing.MessageRouter;
+import util.Tuple;
 
 /**
  * Implementation of Spray and wait router as depicted in
@@ -65,7 +67,10 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 	protected static int layerSizesMin[], layerSizesMax[];
 	protected static int nrOfCopies[];
 	protected static String srcNodeName, dstNodeName;
-	protected static int adaptMode; // 0 => no Adapt; 1 => Src Adapt; 2 => intermediate Adapt
+	protected static int adaptMode; // 0 => no Adapt; 1 => PREFER_CC ; 2 => SRC_ADAPT
+	
+	protected static final int PREFER_CC = 1;
+	protected static final int SRC_ADAPT = 2;
 	
 	protected boolean isSrc = false;
 	protected boolean isDst = false;
@@ -168,6 +173,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 
 	int lastBurstTime=-3600 * 12;
 	int summaryPrintTime= 0;
+	@SuppressWarnings("unchecked")
 	@Override
 	public void update() {
 		super.update();
@@ -192,13 +198,42 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		}
 
 		/* create a list of SAWMessages that have copies left to distribute */
-		@SuppressWarnings(value = "unchecked")
-		List<Message> copiesLeft = sortByQueueMode(getMessagesWithCopiesLeft());
+		List<Message> copiesLeft = getMessagesWithCopiesLeft();
+		if(0 == (adaptMode & PREFER_CC)) {
+			 copiesLeft = sortByQueueMode(copiesLeft);
+		} else {
+			Collections.sort(copiesLeft, ccComparator);
+		}
 
 		if (copiesLeft.size() > 0) {
 			/* try to send those messages */
 			this.tryMessagesToConnections(copiesLeft, getConnections());
 		}
+	}
+
+	@SuppressWarnings(value = "unchecked")
+	@Override
+	public boolean requestDeliverableMessages(Connection con) {
+		if (isTransferring()) {
+			return false;
+		}
+
+		DTNHost other = con.getOtherNode(getHost());
+		/* do a copy to avoid concurrent modification exceptions
+		 * (startTransfer may remove messages) */
+		ArrayList<Message> temp =
+			new ArrayList<Message>(this.getMessageCollection());
+		if(0 != (adaptMode & PREFER_CC)) {
+			Collections.sort(temp, ccComparator);
+		}
+		for (Message m : temp) {
+			if (other == m.getTo()) {
+				if (startTransfer(m, con) == RCV_OK) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -285,15 +320,24 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 	// from script copyCounts=( 768,512,256,256,192,192,128,128,96,96 
 	int burstId =0;
 	int sentCount = 0;
+	double layerLast = -1;
 	protected void sendBurst() {
 		assert null != srcHost : "SRC host not set";
 		assert null != dstHost : "DST host not set";
-		assert rng !=null : "rngSeed not set for SNWAdaptiveRtr";
-		for(int i =0; i < numLayers; i++) {
+		assert null != rng : "rngSeed not set for SNWAdaptiveRtr";
+		if(layerLast <0) {
+			layerLast = numLayers;
+		}
+		if(0 != (adaptMode & SRC_ADAPT)) {
+			if(burstId * burstGap> 24 * 3600) 
+				adaptLayerLast();
+			
+		}
+		for(int i =0; i < layerLast; i++) {
 			String msgId = "B" + String.format("%04d", burstId) + "_L" + i;
 			int size = layerSizesMin[i] + (int)((layerSizesMax[i] - layerSizesMin[i]) * rng.nextDouble());
 			Message m = new Message(srcHost, dstHost, msgId, size);
-			int copyCount = nrOfCopies[i];// TODO logic for adaptive mode
+			int copyCount = nrOfCopies[i];
 			m.addProperty(MSG_COUNT_PROPERTY, new Integer(copyCount)); 
 			
 			this.createNewMessage(m);
@@ -304,6 +348,35 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 			}
 		}
 		burstId++;
+	}
+	
+	// adapt based on acks - presently same logic as scripts
+	void adaptLayerLast() {
+		int ackCount=0;
+		int sixHrBurstCount = 6 * 3600 / burstGap;
+		String msgId = "B" + String.format("%04d", burstId - sixHrBurstCount) + "_L" + 0;
+		if(srcAckList.contains(msgId)) ackCount++;
+		msgId = "B" + String.format("%04d", burstId - 2 * sixHrBurstCount) + "_L" + 0;
+		if(srcAckList.contains(msgId)) ackCount++;
+		msgId = "B" + String.format("%04d", burstId - 4 * sixHrBurstCount) + "_L" + 0;
+		if(srcAckList.contains(msgId)) ackCount++;
+		if(ackCount ==0) {
+			if(layerLast > 0.15 * numLayers)
+				layerLast = 0.98 * layerLast;
+		} else if(ackCount ==1){
+			if(layerLast > 0.33 * numLayers)
+				layerLast = 0.99 * layerLast;
+			else
+				layerLast = 0.002 +  layerLast;
+		} else if(ackCount ==2){
+			if(layerLast > 0.66 * numLayers)
+				layerLast = 0.995 * layerLast;
+			else
+				layerLast = 0.005 +  layerLast;
+		} else { // ackCount ==3
+			if(layerLast < numLayers)
+				layerLast = 0.01 +  layerLast;
+		}
 	}
 	
 	List<String> ackList = new ArrayList<String>();
@@ -342,7 +415,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 
 	}
 	
-	int destRcvdCount =0;
+	int destRcvdCount =0; // TODO - count for base layer
 	protected void processAtDest(Message m) {
 		ackList.add(m.getId());
 		destRcvdCount++;
@@ -350,8 +423,46 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		System.out.println("Delivered at destination " + m.getId() + " count=" + destRcvdCount);
 	}
 
-	void 	printSummary() {
+	void 	printSummary() { // TODO - print count for base layer
 		System.out.println("At time " + SimClock.getIntTime() / 3600 + " hours Sent=" + sentCount + 
-				" delivered=" + ((SNWAdaptiveRouter)dstHost.getRouter()).destRcvdCount);
+				" delivered=" + ((SNWAdaptiveRouter)dstHost.getRouter()).destRcvdCount + " layerLast " + layerLast);
 	}
+	
+	@SuppressWarnings(value = { "unchecked", "rawtypes" }) /* ugly way to make this generic */
+	class CopyCntComparator implements Comparator{
+		/** Compares two tuples by their messages' receiving time */
+		public int compare(Object o1, Object o2) {
+			double diff;
+			Message m1, m2;
+
+			if (o1 instanceof Tuple) {
+				m1 = ((Tuple<Message, Connection>)o1).getKey();
+				m2 = ((Tuple<Message, Connection>)o2).getKey();
+			}
+			else if (o1 instanceof Message) {
+				m1 = (Message)o1;
+				m2 = (Message)o2;
+			}
+			else {
+				throw new SimError("Invalid type of objects in " +
+						"the list");
+			}
+			if(m1.getProperty(MSG_COUNT_PROPERTY)!= null && 
+					m2.getProperty(MSG_COUNT_PROPERTY)!= null ) {
+				diff = (Integer)m1.getProperty(MSG_COUNT_PROPERTY) - 
+						(Integer)m2.getProperty(MSG_COUNT_PROPERTY);
+				if(diff <0) return -1;
+				if(diff >0) return 1;
+			}
+
+			diff = m1.getReceiveTime() - m2.getReceiveTime();
+			if (diff == 0) {
+				return 0;
+			}
+			return (diff < 0 ? -1 : 1);
+		}
+	} 
+	CopyCntComparator ccComparator = new CopyCntComparator();
+
+	
 }
