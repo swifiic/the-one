@@ -35,7 +35,7 @@ Group2.nrofHosts = 1
 Group3.nrofHosts = 41
 
 # Message TTL 24 hours (86400) 48 hours as 172800
-Group.msgTtl = 172800
+Group.msgTtl = 2880
 
 
 # one set of events for generating  contacts between nodes
@@ -62,14 +62,4 @@ SNWRtr.layersSizeMax = 30k,3k,6k,12k,24k, 150k,6k,7k,13k,25k
 
 SNWRtr.rngSeed = [ 1001; 1002; 1003; 1004; 1005; 1006;]
 
-Scenario.name = snwadapt_C%%SNWRtr.nrofCopies%%_B%%SNWRtr.binaryMode%%_A%%SNWRtr.adaptMode%%_%%SNWRtr.rngSeed%%
-
-Report.nrofReports = 3
-# length of the warm up period (simulated seconds)
-Report.warmup = 0
-# default directory of reports (can be overridden per Report with output setting)
-Report.reportDir = reports/
-# Report classes to load
-Report.report1 = MessageStatsReport
-Report.report2 = ContactTimesReport
-Report.report3 = DeliveredMessagesReport
+Scenario.subname = linear

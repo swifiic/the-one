@@ -1,0 +1,2 @@
+# Message TTL 24 hours (86400) 48 hours as 172800
+Group.msgTtl = 2880
