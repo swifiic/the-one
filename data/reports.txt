@@ -1,5 +1,5 @@
 
-Scenario.name = snwadapt_C%%Scenario.subname%%_A%%SNWRtr.adaptMode%%_%%SNWRtr.rngSeed%%_ttl%%Group.msgTtl%%
+Scenario.name = snwadapt_C%%Scenario.subname%%_A%%SNWRtr.adaptMode%%_%%SNWRtr.rngSeed%%_ttl%%Group.msgTtl%%_bg%%SNWRtr.burstGap%%
 
 Report.nrofReports = 3
 # length of the warm up period (simulated seconds)
@@ -10,3 +10,4 @@ Report.reportDir = reports/
 Report.report1 = MessageStatsReport
 Report.report2 = ContactTimesReport
 Report.report3 = DeliveredMessagesReport
+

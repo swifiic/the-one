@@ -354,11 +354,11 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 	void adaptLayerLast() {
 		int ackCount=0;
 		int sixHrBurstCount = 6 * 3600 / burstGap;
-		String msgId = "B" + String.format("%04d", burstId - sixHrBurstCount) + "_L" + 0;
+		String msgId = "B" + String.format("%04d", burstId - sixHrBurstCount) + "_L0";
 		if(srcAckList.contains(msgId)) ackCount++;
-		msgId = "B" + String.format("%04d", burstId - 2 * sixHrBurstCount) + "_L" + 0;
+		msgId = "B" + String.format("%04d", burstId - 2 * sixHrBurstCount) + "_L0";
 		if(srcAckList.contains(msgId)) ackCount++;
-		msgId = "B" + String.format("%04d", burstId - 4 * sixHrBurstCount) + "_L" + 0;
+		msgId = "B" + String.format("%04d", burstId - 4 * sixHrBurstCount) + "_L0";
 		if(srcAckList.contains(msgId)) ackCount++;
 		if(ackCount ==0) {
 			if(layerLast > 0.15 * numLayers)
@@ -415,17 +415,22 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 
 	}
 	
-	int destRcvdCount =0; // TODO - count for base layer
+	int destRcvdCount =0;
+	int baseLayerCount =0;
 	protected void processAtDest(Message m) {
 		ackList.add(m.getId());
 		destRcvdCount++;
+		if(m.getId().contains("L0"))
+			baseLayerCount++;
 		if(destRcvdCount < 100 || destRcvdCount %500 ==0)
 		System.out.println("Delivered at destination " + m.getId() + " count=" + destRcvdCount);
 	}
 
-	void 	printSummary() { // TODO - print count for base layer
+	void 	printSummary() { 
+		SNWAdaptiveRouter destRtr = ((SNWAdaptiveRouter)dstHost.getRouter());
 		System.out.println("At time " + SimClock.getIntTime() / 3600 + " hours Sent=" + sentCount + 
-				" delivered=" + ((SNWAdaptiveRouter)dstHost.getRouter()).destRcvdCount + " layerLast " + layerLast);
+				" BL-rcvd=" + destRtr.baseLayerCount + " delivered=" + destRtr.destRcvdCount + 
+				" layerLast " + layerLast);
 	}
 	
 	@SuppressWarnings(value = { "unchecked", "rawtypes" }) /* ugly way to make this generic */
