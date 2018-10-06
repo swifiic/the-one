@@ -54,7 +54,7 @@ SNWRtr.src = S0
 SNWRtr.dst = D1
 SNWRtr.binaryMode = 1
 SNWRtr.adaptMode = 0
-SNWRtr.burstGap = 60
+SNWRtr.burstGap = 300
 # present file size as compressed using SHM; should use h265 without layers for true comparision 
 SNWRtr.burstSize = 150k,300k
 SNWRtr.nrofCopies = 32,32,32,32,32, 32,32,32,32,32
