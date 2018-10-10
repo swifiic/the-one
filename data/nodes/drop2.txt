@@ -1,0 +1,3 @@
+Events1.filePath = [data/contacts/noN3N4.txt;]
+Scenario.nodeNotes=drop2
+

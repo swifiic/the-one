@@ -1,8 +1,8 @@
 /*
- * Copyright 2010 Aalto University, ComNet
+ * Copyright 2018 BITS Pilani, Hyderabad Campus (SWiFiIC / Vectors)
  * Released under GPLv3. See LICENSE.txt for details.
  */
-package routing.vectors;
+package routing;
 
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -23,7 +23,7 @@ import core.MessageListener;
  * 
  * Abhishek: extended to support abort hop count
  */
-public class MessageAbortHopCountReport extends Report implements MessageListener {
+public class MsgStatsAndAbortRep extends Report implements MessageListener {
 	private Map<String, Double> creationTimes;
 	private List<Double> latencies;
 	private List<Integer> hopCounts;
@@ -44,7 +44,7 @@ public class MessageAbortHopCountReport extends Report implements MessageListene
 	/**
 	 * Constructor.
 	 */
-	public MessageAbortHopCountReport() {
+	public MsgStatsAndAbortRep() {
 		init();
 	}
 
@@ -179,20 +179,21 @@ public class MessageAbortHopCountReport extends Report implements MessageListene
 			"\nbuffertime_med: " + getMedian(this.msgBufferTime) +
 			"\nrtt_avg: " + getAverage(this.rtt) +
 			"\nrtt_med: " + getMedian(this.rtt) +
-			"\nabortHopCounts_avg: " + getIntAverage(this.abortHopCounts) +
-			"\nabortHopCounts_med: " + getIntMedian(this.abortHopCounts) +
-			"\nabortHopMetric: " + getIntCount(this.abortHopCounts, 0) + ", " + 
-			getIntCount(this.abortHopCounts, 1) + ", " + getIntCount(this.abortHopCounts, 2)
+			"\nabrtHopCnt_avg: " + getIntAverage(this.abortHopCounts) +
+			"\nabrtHopCnt_med: " + getIntMedian(this.abortHopCounts) +
+			"\nabrtHopCnts: " + getCount(this.abortHopCounts, 0) + ", " + 
+			getCount(this.abortHopCounts, 1) + ", " + getCount(this.abortHopCounts, 2) +
+			", " + getCount(this.abortHopCounts, 3) +", " + getCount(this.abortHopCounts, 4)
 			;  
 
 		write(statsText);
 		super.done();
 	}
 	
-	public String getIntCount(List<Integer> values, int valToCount) {
+	public int getCount(List<Integer> values, int valToCount) {
 		int count = 0;
 		if (values.size() == 0) {
-			return NAN;
+			return 999999;
 		}
 
 		for (int iValue : values) {
@@ -200,7 +201,7 @@ public class MessageAbortHopCountReport extends Report implements MessageListene
 				count++;
 		}
 
-		return format(count);
+		return count;
 	}
 
 }

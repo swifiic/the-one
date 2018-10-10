@@ -1,0 +1,22 @@
+# 320    14, 2, 4, 7, 12,           91, 15, 15, 20, 27,        10(MD)  1.3(MD.zip)    125 mp4 
+SNWRtr.layersSizeMin = 80k,5k, 8k, 10k, 15k,   700k,250k,150k,200k,220k
+# 100
+SNWRtr.layersSizeMax = 120k,11k,14k,18k,25k,  1000k,415k,300k,330k,350k
+# 150
+
+Scenario.flow=1280svc
+
+
+# measures from Oct 7th BITS video
+# 1280 - 100, 8, 11, 14, 20,        856, 332, 224, 264, 284,   10(MD), 2(MD.zip)     1500 mp4
+# SNWRtr.layersSizeMin = 80k,5k, 8k, 10k, 15k,   700k,250k,150k,200k,220k        1200
+# SNWRtr.layersSizeMax = 120k,11k,14k,18k,25k,  1000k,415k,300k,330k,350k        1800
+
+# 640    36, 3, 5, 8, 14,           264, 52, 48, 64, 76,       10(MD),  1.5(MD.zip)   400 mp4
+# SNWRtr.layersSizeMin = 20k,2k,3k,4k,10k,  200k,40k,40k,50k,50k      300
+# SNWRtr.layersSizeMax = 55k,4k,7k,12k,18k, 330k,64k,56k,78k,102k     500
+
+# 320    14, 2, 4, 7, 12,           91, 15, 15, 20, 27,        10(MD)  1.3(MD.zip)    125 mp4 
+# SNWRtr.layersSizeMin = 10k,1k,2k,4k,8k,  50k,10k,10k,10k,15k        100
+# SNWRtr.layersSizeMax = 20k,3k,6k,12k,16k, 140k,20k,20k,30k,40k      150
+

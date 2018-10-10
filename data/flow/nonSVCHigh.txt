@@ -2,13 +2,12 @@
 # src dst nrofCopies   binaryMode  adaptMode   
 # burstGap   burstSize layersSizeMin   layersSizeMax
 
-SNWRtr.burstSize = 150k,300k
 SNWRtr.nrofCopies = 32
-SNWRtr.layersSizeMin = 80k
-SNWRtr.layersSizeMax = 180k
+SNWRtr.layersSizeMin = 1200k
+SNWRtr.layersSizeMax = 1800k
 
 
 Scenario.subname = nonSVC
+Scenario.flow = high
 
-Scenario.name = snwadapt_C%%Scenario.subname%%_A%%SNWRtr.adaptMode%%_%%SNWRtr.rngSeed%%
 
