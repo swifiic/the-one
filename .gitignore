@@ -2,7 +2,11 @@
 *.class
 
 # Simulation report files
-*reports*/*.txt
+*rep*/*.txt
+
+# temporary run list and output files
+*list*
+*out*/*
 
 # Javadocs
 *.html
