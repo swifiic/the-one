@@ -2,4 +2,4 @@
 # 172800
 #  43200
 # 216000
-Group.msgTtl = 3600
+Group.msgTtl = 360

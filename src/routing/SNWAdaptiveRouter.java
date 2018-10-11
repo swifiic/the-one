@@ -329,7 +329,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 			layerLast = numLayers;
 		}
 		if(0 != (adaptMode & SRC_ADAPT)) {
-			if(burstId * burstGap> 24 * 3600) 
+			if(burstId * burstGap> 6 * 3600) 
 				adaptLayerLast();
 			
 		}
@@ -350,6 +350,7 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		burstId++;
 	}
 	
+	int ack0=0, ack1=0, ack2=0, ack3=0;
 	// adapt based on acks - presently same logic as scripts
 	void adaptLayerLast() {
 		int ackCount=0;
@@ -361,22 +362,28 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		msgId = "B" + String.format("%04d", burstId - 4 * sixHrBurstCount) + "_L0";
 		if(srcAckList.contains(msgId)) ackCount++;
 		if(ackCount ==0) {
+			ack0++;
 			if(layerLast > 0.15 * numLayers)
 				layerLast = 0.98 * layerLast;
 		} else if(ackCount ==1){
+			ack1++;
 			if(layerLast > 0.33 * numLayers)
 				layerLast = 0.99 * layerLast;
 			else
 				layerLast = 0.002 +  layerLast;
 		} else if(ackCount ==2){
+			ack2++;
 			if(layerLast > 0.66 * numLayers)
 				layerLast = 0.995 * layerLast;
 			else
 				layerLast = 0.005 +  layerLast;
 		} else { // ackCount ==3
+			ack3++;
 			if(layerLast < numLayers)
 				layerLast = 0.01 +  layerLast;
 		}
+		if(layerLast < 1.1) layerLast = 1.1;
+		if(layerLast > numLayers) layerLast = numLayers;
 	}
 	
 	List<String> ackList = new ArrayList<String>();
@@ -430,7 +437,8 @@ public class SNWAdaptiveRouter extends routing.ActiveRouter {
 		SNWAdaptiveRouter destRtr = ((SNWAdaptiveRouter)dstHost.getRouter());
 		System.out.println("At time " + SimClock.getIntTime() / 3600 + " hours Sent=" + sentCount + 
 				" BL-rcvd=" + destRtr.baseLayerCount + " delivered=" + destRtr.destRcvdCount + 
-				" layerLast " + layerLast);
+				" layerLast " + layerLast + " ackCounts " + ack0 + ", "+ ack1 + ", "+ 
+				ack2 + ", "+ ack3);
 	}
 	
 	@SuppressWarnings(value = { "unchecked", "rawtypes" }) /* ugly way to make this generic */

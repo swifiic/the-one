@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ttlList="720 1440 2160 2880 3600"
+ttlList="720 1440 2160 2880"
 flowList="low medium high"
 contorlList="nonSVC sAdptAndCC"
 nodeList="base drop1 drop2 drop4"

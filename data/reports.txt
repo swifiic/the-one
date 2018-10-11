@@ -3,7 +3,7 @@ Scenario.name = %%Scenario.subname%%_N%%Scenario.nodeNotes%%_R%%Scenario.flow%%_
 
 Report.nrofReports = 2
 # length of the warm up period (simulated seconds)
-Report.warmup = 0
+Report.warmup = 86400
 # default directory of reports (can be overridden per Report with output setting)
 Report.reportDir = reports/
 # Report classes to load
