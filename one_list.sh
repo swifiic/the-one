@@ -6,7 +6,7 @@ eCmd="data/reports.txt"
 nonLinear="data/flow/nonLinear.txt"
 prefCC="data/prefCC.txt"
 fullAdapt="data/fullAdapt.txt"
-ttlList="24 36 48 12"
+ttlList="24 36 48 12 06"
 
 for  ttl in ${ttlList} ; do
       # five runs for Full Adapt, prefCC, nonLinear, Linear, nonSVC - only Full Adapt and nonSVC for now
