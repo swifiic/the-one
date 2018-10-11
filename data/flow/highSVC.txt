@@ -4,7 +4,7 @@ SNWRtr.layersSizeMin = 80k,5k, 8k, 10k, 15k,   700k,250k,150k,200k,220k
 SNWRtr.layersSizeMax = 120k,11k,14k,18k,25k,  1000k,415k,300k,330k,350k
 # 150
 
-Scenario.flow=1280svc
+Scenario.flow=high
 
 
 # measures from Oct 7th BITS video
