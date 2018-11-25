@@ -8,7 +8,8 @@ Scenario.simulateConnections = true
 
 # 43200s == 12h - 1 week => 14 * 43200
 # Scenario.endTime = 60
-Scenario.endTime = 604805
+# Scenario.endTime = 604805  - was 7 days
+Scenario.endTime = 302405
 
 #  group settings
 Scenario.nrofHostGroups = 3

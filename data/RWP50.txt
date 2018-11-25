@@ -4,7 +4,7 @@ Scenario.nodeNotes = RWP50
 Group.movementModel = ShortestPathMapBasedMovement
 Group.waitTime = 0, 0
 Group.speed = 0.5, 1.5
-Group.nrofHosts = 50
+Group.nrofHosts = 48
 Group.bufferSize = 10M
 
 Group3.groupID = p
