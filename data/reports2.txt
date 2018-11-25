@@ -1,0 +1,13 @@
+
+Scenario.name = %%Scenario.subname%%_N%%Scenario.nodeNotes%%_R%%Scenario.flow%%_A%%SNWRtr.adaptMode%%_%%SNWRtr.rngSeed%%_ttl%%Group.msgTtl%%_bg%%SNWRtr.burstGap%%_aI%%SNWRtr.addIncr%%_mD%%SNWRtr.multDecr%%
+
+Report.nrofReports = 2
+# length of the warm up period (simulated seconds)
+Report.warmup = 0
+# default directory of reports (can be overridden per Report with output setting)
+Report.reportDir = reports/
+# Report classes to load
+Report.report1 = MsgStatsAndAbortRep
+Report.report2 = DeliveredMessagesReport
+Report.report3 = ContactTimesReport
+

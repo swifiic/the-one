@@ -1,0 +1,4 @@
+SNWRtr.adaptMode = 5
+
+Scenario.subname = s2AckAdptAndCC
+
