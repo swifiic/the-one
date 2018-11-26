@@ -341,7 +341,7 @@ public class SNWAdaptiveRouterVec2 extends routing.ActiveRouter {
 			layerLast = numLayers;
 		}
 		if(0 != (adaptMode & (SRC_ADAPT_3 | SRC_ADAPT_2 | SRC_ADAPT_1))) {
-			if(burstId * burstGap> 24 * 3600) 
+			if(burstId * burstGap> 12 * 3600) 
 				adaptLayerLast();
 			
 		}
@@ -364,6 +364,7 @@ public class SNWAdaptiveRouterVec2 extends routing.ActiveRouter {
 	
 	// adapt based on acks - DT / 2DT / 4DT (TTL = 2DT)
 	double factor = 1.0;
+	int layerPrintCount=0;
 	void adaptLayerLast() {
 		int ackCount=0;
 		int maxCount = 1;
@@ -386,9 +387,14 @@ public class SNWAdaptiveRouterVec2 extends routing.ActiveRouter {
 		
 		factor = factor * power + ackCount*addIncr;
 		if(factor > 1) factor =1;
+		if(factor < (1.0/numLayers))  factor = 1.0 / numLayers;
 
 		layerLast = numLayers * factor;
 		if(layerLast < 1) layerLast =1 ;
+		if(++layerPrintCount < 32 || layerPrintCount % 50 ==0) {
+			System.out.println("adaptLL  " + layerPrintCount + " factor=" + factor +
+					" layerLast=" + layerLast + " ackCount=" + ackCount + " maxCount=" + maxCount);
+		}
 	}
 	
 	List<String> ackList = new ArrayList<String>();
