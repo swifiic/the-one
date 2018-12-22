@@ -27,12 +27,15 @@ Group.interface1 = btInterface
 # only source has larger buffers
 Group1.bufferSize = 100M
 Group1.groupID = S
+Group1.speed=0.5,1.5
 Group1.nrofHosts = 1
 
 Group2.groupID = D
+Group2.speed=0.5,1.5
 Group2.nrofHosts = 1
 
 Group3.nrofHosts = 48
+Group3.speed=0.5,1.5
 
 # Message TTL 24 hours (86400) 48 hours as 172800
 Group.msgTtl = 2880
