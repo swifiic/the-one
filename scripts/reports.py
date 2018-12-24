@@ -63,6 +63,12 @@ def extract_data(filename=None, run_count=None):
 
 
 if __name__ == "__main__":
+    """
+    Arguments:
+    1. Report directory path 
+    2. Report destination path
+    3. Report name
+    """
     if len(sys.argv) > 1:
         dir_path = sys.argv[1]
         dest_path = sys.argv[2]
