@@ -15,6 +15,8 @@ Run pip3 install -r requirements.txt before running this script.
 
 import os
 import sys
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 
@@ -133,8 +135,8 @@ def plot_report_data(report_path=None):
             data = line.split("\t")
             ack = data[0][1]
             if not ack == 'o':
-                addIncr = data[0].split("_")[6]
-                multDecr = data[0].split("_")[7]
+                addIncr = data[0].split("_")[7]
+                multDecr = data[0].split("_")[8]
                 delivery_prob, latency_avg = data[1], data[2]
                 addIncr = float(addIncr.strip("aI"))
                 multDecr = float(multDecr.strip("mD"))
