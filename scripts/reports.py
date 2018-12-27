@@ -84,9 +84,9 @@ def generate_report(dir_path="./rep2", dest_path="./", report_name="report.txt")
     if dest_path.endswith("/"):
         dest_path += "/"
     generate_layer_report(dir_path, dest_path, report_name, run_count)
-    plot_report_data(dest_path+report_name)
     with open(dest_path+report_name, 'w') as f:
         f.write(report)       
+    plot_report_data(dest_path+report_name)
 
 
 def extract_data(filename=None, run_count=None):
@@ -176,8 +176,11 @@ def plot_report_data(report_path=None):
             const_mult_delivery_data.append(ack_mult_delivery_data)
             const_mult_latency_data.append(ack_mult_latency_data)
         print(const_mult_add_data)
+        print(const_add_mult_data)
         print(const_add_latency_data)
         print(const_add_delivery_data)
+        print(const_mult_delivery_data)
+        print(const_mult_latency_data)
         plot_data("Additive Increase vs Latency", "Additive Increase", "Latency", const_mult_add_data, const_mult_latency_data, seg_data.keys())
         plot_data("Additive Increase vs Delivery payloads", "Additive Increase", "Delivery payloads", const_mult_add_data, const_mult_delivery_data, seg_data.keys())
         plot_data("Multiplicative Decrease vs Latency", "Multiplicative decrease", "Latency", const_add_mult_data, const_add_latency_data, seg_data.keys())
@@ -189,12 +192,11 @@ def plot_data(graph_title=None, x_label=None, y_label=None, x_data=None, y_data=
     General method to plot given arguments. Only for multiple y-data
     """
     y_data_labels = list(y_data_labels)
-    if str(graph_title).__contains__("Latency"):
-        plt.gca().set_ylim([4000, 5000])
-    else:
-        plt.gca().set_ylim([0.40, 0.55])
+    # if str(graph_title).__contains__("Latency"):
+    #     plt.gca().set_ylim([4000, 5000]) # Set's the Y limits. gca - get current axes
+    # else:
+    #     plt.gca().set_ylim([0.40, 0.55])
     for Y in y_data:
-        #plt.plot(sorted(x_data), [y for _, y in sorted(zip(x_data,Y), key=lambda pair: pair[0])], color=COLOURS[y_data.index(Y)], label=str(y_data_labels[y_data.index(Y)]), marker=".")
         x, y = zip(*sorted(zip(x_data, Y), key=lambda x: x[0]))
         plt.plot(x, y, color=COLOURS[y_data.index(Y)], label="Ack" + str(y_data_labels[y_data.index(Y)]), marker=".")
     plt.title(graph_title, fontsize=16, fontweight='bold')
