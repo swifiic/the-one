@@ -1,0 +1,1 @@
+SNWRtr.multDecr = 0.003

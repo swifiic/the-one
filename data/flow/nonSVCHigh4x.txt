@@ -1,0 +1,13 @@
+# now the vectors specific settings
+# src dst nrofCopies   binaryMode  adaptMode   
+# burstGap   burstSize layersSizeMin   layersSizeMax
+
+SNWRtr.nrofCopies = 32
+SNWRtr.layersSizeMin = 2400k
+SNWRtr.layersSizeMax = 3600k
+
+
+Scenario.subname = nonSVC
+Scenario.flow = high4x
+
+
