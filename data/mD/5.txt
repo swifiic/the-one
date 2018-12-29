@@ -1,1 +1,1 @@
-SNWRtr.addIncr = 0.01
+SNWRtr.multDecr = 0.01

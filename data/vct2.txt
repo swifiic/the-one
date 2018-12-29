@@ -16,7 +16,7 @@ Scenario.nrofHostGroups = 3
 
 Group.groupID = N
 Group.router = SNWAdaptiveRouterVec2
-Group.bufferSize = 10M
+Group.bufferSize = 50M
 Group.nrofHosts = 50
 
 
@@ -25,7 +25,7 @@ Group.nrofInterfaces = 1
 Group.interface1 = btInterface
 
 # only source has larger buffers
-Group1.bufferSize = 100M
+Group1.bufferSize = 500M
 Group1.groupID = S
 Group1.speed=0.5,1.5
 Group1.nrofHosts = 1
