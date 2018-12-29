@@ -341,7 +341,6 @@ public class SNWAdaptiveRouterVec2 extends routing.ActiveRouter {
 			layerLast = numLayers;
 		}
 		if(0 != (adaptMode & (SRC_ADAPT_3 | SRC_ADAPT_2 | SRC_ADAPT_1))) {
-			if(burstId * burstGap> 12 * 3600) 
 				adaptLayerLast();
 			
 		}
@@ -365,6 +364,7 @@ public class SNWAdaptiveRouterVec2 extends routing.ActiveRouter {
 	// adapt based on acks - DT / 2DT / 4DT (TTL = 2DT)
 	double factor = 1.0;
 	int layerPrintCount=0;
+	int downAdaptedBurstId = 0;
 	void adaptLayerLast() {
 		int ackCount=0;
 		int maxCount = 1;
@@ -383,17 +383,27 @@ public class SNWAdaptiveRouterVec2 extends routing.ActiveRouter {
 		}
 		double power = 1;
 		for(int i=ackCount; i < maxCount; i++)
-			power = power * multDecr;
+			power = power * (1 -multDecr);
 		
+		// RTT == this.msgTtl * 60 * 2 - slow down MultDecrease two DT/2
+		if(power < 0.99999) {
+		     if((burstId - downAdaptedBurstId) > ( (this.msgTtl * 60)/ (4 * burstGap ))) {
+			return;  // don't adapt down
+		     } else {
+			downAdaptedBurstId = burstId;
+		     }
+		}
+
 		factor = factor * power + ackCount*addIncr;
 		if(factor > 1) factor =1;
 		if(factor < (1.0/numLayers))  factor = 1.0 / numLayers;
 
 		layerLast = numLayers * factor;
 		if(layerLast < 1) layerLast =1 ;
-		if(++layerPrintCount < 32 || layerPrintCount % 50 ==0) {
+		if(++layerPrintCount < 32 || layerPrintCount % 10 ==0) {
 			System.out.println("adaptLL  " + layerPrintCount + " factor=" + factor +
-					" layerLast=" + layerLast + " ackCount=" + ackCount + " maxCount=" + maxCount);
+					" layerLast=" + layerLast + " ackCount=" + ackCount + 
+				        " dABid=" + downAdaptedBurstId + " maxCount=" + maxCount);
 		}
 	}
 	
