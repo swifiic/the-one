@@ -1,5 +1,5 @@
 REPORT_FILE_SUFFIX = "MsgStatsAndAbortRep.txt"
-FIELDS = ['latency_avg', 'delivery_prob', 'overhead_ratio', 'deivered']
+FIELDS = ['latency_avg', 'delivery_prob', 'overhead_ratio', 'delivered']
 LAYER_FILE_SUFFIX = "DeliveredMessagesReport.txt"
 LAYERS = ['L0', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9']
 COLOURS = ["#FFA500", "#0000FF", "#00FF00"]
