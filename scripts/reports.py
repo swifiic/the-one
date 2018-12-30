@@ -1,5 +1,5 @@
 REPORT_FILE_SUFFIX = "MsgStatsAndAbortRep.txt"
-FIELDS = ['latency_avg', 'delivery_prob']
+FIELDS = ['latency_avg', 'delivery_prob', 'overhead_ratio', 'deivered']
 LAYER_FILE_SUFFIX = "DeliveredMessagesReport.txt"
 LAYERS = ['L0', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9']
 COLOURS = ["#FFA500", "#0000FF", "#00FF00"]
@@ -45,12 +45,13 @@ def generate_layer_report(dir_path="./rep2", dest_path="./", report_name="report
             summary[sub_report_name] = report_summary
         # except Exception as e:
         #     print(e)
-    file_summary = "Filename\taI\tmD\t0,1,2,3,4,5,6,7,8,9\n"
+    file_summary = "Summary_Filename\taI\tmD\t0,1,2,3,4,5,6,7,8,9\n"
     for report in summary.keys():
         file_summary += report + "\t" + report.split("_")[6].strip("aI") + "\t" + report.split("_")[7].strip("mD") + "\t"
         for layer in summary[report]:
             file_summary += str(layer) + ","
         file_summary += "\n"
+    print(file_summary)
     with open(dest_path + rep_name.replace(".txt", "_summary.txt"), 'w') as f:
         f.write(file_summary)
 
@@ -80,7 +81,7 @@ def generate_report(dir_path="./rep2", dest_path="./", report_name="report.txt")
                 report_data[str(filename).replace("_" + filename.split("_")[4], "")][k] += stat[k]
         else: 
             report_data[str(filename).replace("_" + filename.split("_")[4], "")] = stat
-    report = "filename" + "\t"
+    report = "StatsFilename" + "\t"
     for field in report_data[list(report_data.keys())[0]].keys():
         report += str(field) + "\t"
     report += '\n'
@@ -94,6 +95,7 @@ def generate_report(dir_path="./rep2", dest_path="./", report_name="report.txt")
         dest_path += "/"
     with open(dest_path+report_name, 'w') as f:
         f.write(report) 
+    print(report)
     generate_layer_report(dir_path, dest_path, report_name, run_count)      
     plot_report_data(dest_path+report_name)
 
