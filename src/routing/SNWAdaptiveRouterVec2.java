@@ -368,23 +368,16 @@ public class SNWAdaptiveRouterVec2 extends routing.ActiveRouter {
 		int ackCount=0;
 		int maxCount = 1;
 		int oldBurstCount = (this.msgTtl * 60) / (burstGap * 2);
-		String msgId = "B" + String.format("%04d", burstId - oldBurstCount) + "_L0";
-		if(srcAckList.contains(msgId)) ackCount++;
-		if(0 != ((SRC_ADAPT_3 | SRC_ADAPT_2)& adaptMode) ) {
-			msgId = "B" + String.format("%04d", burstId - 2 * oldBurstCount) + "_L0";
-			if(srcAckList.contains(msgId)) ackCount++;
-			maxCount++;
-		}
-		if(0 != (SRC_ADAPT_3 & adaptMode) ) {
-			msgId = "B" + String.format("%04d", burstId - 4 * oldBurstCount) + "_L0";
-			if(srcAckList.contains(msgId)) ackCount++;
-			maxCount++;
-		}
-		double power = 1;
-		for(int i=ackCount; i < maxCount; i++)
-			power = power * (1 -multDecr);
+		int mult = 1;
+		if(0 != (SRC_ADAPT_3 & adaptMode))
+			mult = 4;
+		else if(0 != (SRC_ADAPT_2 & adaptMode))
+			mult = 2;
+		String msgId = "B" + String.format("%04d", burstId - oldBurstCount * mult) + "_L0";
+
+		if(srcAckList.contains(msgId)) factor += addIncr;
+		else	factor = factor * (1 -multDecr);
 		
-		factor = factor * power + ackCount*addIncr;
 		if(factor > 1) factor =1;
 		if(factor < (1.0/numLayers))  factor = 1.0 / numLayers;
 
