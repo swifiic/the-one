@@ -76,9 +76,6 @@ public class SNWAdaptiveRouterVec2 extends routing.ActiveRouter {
 	protected static double multDecr = 0.01;  
 	
 	protected static final int PREFER_CC = 1;
-	protected static final int SRC_ADAPT_3 = 2; // 3 DT 
-	protected static final int SRC_ADAPT_2 = 4; // 2 DT
-	protected static final int SRC_ADAPT_1 = 8; // 1 DT
 	
 	protected boolean isSrc = false;
 	protected boolean isDst = false;
@@ -340,7 +337,7 @@ public class SNWAdaptiveRouterVec2 extends routing.ActiveRouter {
 		if(layerLast <0) {
 			layerLast = numLayers;
 		}
-		if(0 != (adaptMode & (SRC_ADAPT_3 | SRC_ADAPT_2 | SRC_ADAPT_1))) {
+		if(0 != adaptMode ) {
 				adaptLayerLast();
 			
 		}
@@ -368,11 +365,7 @@ public class SNWAdaptiveRouterVec2 extends routing.ActiveRouter {
 		int ackCount=0;
 		int maxCount = 1;
 		int oldBurstCount = (this.msgTtl * 60) / (burstGap * 2);
-		int mult = 1;
-		if(0 != (SRC_ADAPT_3 & adaptMode))
-			mult = 4;
-		else if(0 != (SRC_ADAPT_2 & adaptMode))
-			mult = 2;
+		int mult = adaptMode;
 		String msgId = "B" + String.format("%04d", burstId - oldBurstCount * mult) + "_L0";
 
 		if(srcAckList.contains(msgId)) factor += addIncr;

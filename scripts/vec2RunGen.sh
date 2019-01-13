@@ -4,8 +4,8 @@ bCmd="java -Xmx512M -cp target:lib/ECLA.jar:lib/DTNConsoleConnection.jar core.DT
 eCmd="data/reports2.txt"
 
 nonLinear="data/flow/nonLinear.txt"
-# adaptList="data/fullAdapt.txt data/2ackAdapt.txt data/1ackAdapt.txt"
-adaptList="data/fullAdapt.txt"
+adaptList="data/1dtAdapt.txt data/2dtAdapt.txt data/4dtAdapt.txt"
+# adaptList="data/1dtAdapt.txt"
 ttlList="03"
 aimdList="1 2 3 4 5 6 7 8"
 # aimdList="9 10 11 12 13 14 15 16"

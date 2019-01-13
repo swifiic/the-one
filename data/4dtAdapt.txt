@@ -1,0 +1,4 @@
+SNWRtr.adaptMode = 4
+
+Scenario.subname = s4AckAdptAndCC
+

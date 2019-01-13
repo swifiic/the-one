@@ -1,4 +1,0 @@
-SNWRtr.adaptMode = 3
-
-Scenario.subname = s3AckAdptAndCC
-
